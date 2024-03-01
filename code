@@ -1,0 +1,39 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+interface IERC20 {
+    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
+    function approve(address spender, uint256 amount) external returns (bool);
+}
+
+contract DexAggregator {
+    mapping(address => mapping(address => address)) public dexPairs;
+
+    function addDexPair(address tokenA, address tokenB, address dex) external {
+        require(tokenA != address(0) && tokenB != address(0) && dex != address(0), "Invalid address");
+        require(dexPairs[tokenA][tokenB] == address(0), "Pair already exists");
+
+        dexPairs[tokenA][tokenB] = dex;
+    }
+
+    function swap(address tokenIn, address tokenOut, uint256 amountIn, address recipient) external {
+        address dex = dexPairs[tokenIn][tokenOut];
+        require(dex != address(0), "Pair not found");
+
+        IERC20(tokenIn).transferFrom(msg.sender, dex, amountIn);
+        // Appeler une fonction de l'exchange pour effectuer le swap
+        // Supposons que l'exchange dispose d'une fonction "swap"
+        // dex.swap(tokenIn, tokenOut, amountIn, recipient);
+    }
+
+    function addLiquidity(address tokenA, address tokenB, uint256 amountA, uint256 amountB) external {
+        address dex = dexPairs[tokenA][tokenB];
+        require(dex != address(0), "Pair not found");
+
+        IERC20(tokenA).transferFrom(msg.sender, dex, amountA);
+        IERC20(tokenB).transferFrom(msg.sender, dex, amountB);
+        // Appeler une fonction de l'exchange pour ajouter de la liquidité
+        // Supposons que l'exchange dispose d'une fonction "addLiquidity"
+        // dex.addLiquidity(tokenA, tokenB, amountA, amountB);
+    }
+}
